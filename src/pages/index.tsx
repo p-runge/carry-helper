@@ -45,30 +45,54 @@ export default function Home() {
             null ? (
             <p className="text-2xl text-white">That&apos;s not a Pokémon</p>
           ) : (
-            <div className="rounded border border-white p-3 text-white">
-              <p className="text-center text-2xl capitalize">{pokemon.name}</p>
-              <ul>
-                {Object.entries(pokemon.stats).map(([stat, value]) => (
-                  <li
-                    key={stat}
-                    className={`grid grid-cols-2 gap-x-2 capitalize [&:nth-child(2)]:mb-3 [&:nth-child(2)]:border-b [&:nth-child(2)]:pb-3 ${
-                      {
-                        S: "text-green-500",
-                        A: "text-green-300",
-                        B: "text-yellow-400",
-                        C: "text-yellow-600",
-                        D: "text-red-300",
-                        F: "text-red-500",
-                      }[statValueToTier(value)]
-                    }`}
-                    style={{ gridTemplateColumns: "1fr 3ch" }}
-                  >
-                    <div className="text-right">{stat}:</div>
-                    <div>{value}</div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            (() => {
+              const highestStat = Object.entries(pokemon.stats).reduce(
+                (acc, [stat, value]) => {
+                  if (value > acc.value) {
+                    return { stat, value };
+                  }
+
+                  return acc;
+                },
+                { stat: "", value: 0 },
+              ).value;
+
+              return (
+                <div className="rounded border border-white p-3 text-white">
+                  <p className="text-center text-2xl capitalize">
+                    {pokemon.name}
+                  </p>
+                  <hr className="py-2" />
+                  <ul className="flex flex-col gap-2">
+                    {Object.entries(pokemon.stats).map(([stat, value]) => (
+                      <>
+                        <li
+                          key={stat}
+                          className="grid grid-cols-[1fr,3ch,1fr] gap-2 capitalize"
+                        >
+                          <div className="text-right">{stat}:</div>
+                          <div className="w-[3ch] text-right">{value}</div>
+                          <div
+                            className={`h-6 ${
+                              {
+                                S: "bg-green-500",
+                                A: "bg-green-300",
+                                B: "bg-yellow-400",
+                                C: "bg-yellow-600",
+                                D: "bg-red-300",
+                                F: "bg-red-500",
+                              }[statValueToTier(value)]
+                            }`}
+                            style={{ width: `${(value / 255) * 100}%` }}
+                          />
+                        </li>
+                        {stat === "special-attack" && <hr />}
+                      </>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()
           )}
         </div>
       </main>
