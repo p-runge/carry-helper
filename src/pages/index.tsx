@@ -28,7 +28,19 @@ export default function Home() {
           />
           {pokemon && (
             <div className="rounded border border-white p-3 text-white">
-              <p>{pokemon.name}</p>
+              <p className="text-2xl capitalize">{pokemon.name}</p>
+              <ul>
+                {Object.entries(pokemon.stats).map(([stat, value]) => (
+                  <li
+                    key={stat}
+                    className={`grid grid-cols-2 gap-2 capitalize`}
+                    style={{ gridTemplateColumns: "1fr 3ch" }}
+                  >
+                    <div className="text-right">{stat}:</div>
+                    <div>{value}</div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
