@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "~/utils/api";
 
@@ -97,9 +97,19 @@ const DebouncedInput: React.FC<
     return () => clearTimeout(timeout);
   }, [debounce, onChange, value]);
 
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (!inputRef.current) {
+      return;
+    }
+
+    inputRef.current.focus();
+  }, []);
+
   return (
     <input
       {...props}
+      ref={inputRef}
       value={value}
       onChange={(e) => setValue(e.target.value)}
       className={
