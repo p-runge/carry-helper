@@ -33,6 +33,15 @@ export const api = createTRPCNext<AppRouter>({
        *
        * @see https://trpc.io/docs/links
        */
+      queryClientConfig: {
+        defaultOptions: {
+          queries: {
+            refetchOnReconnect: false,
+            refetchOnWindowFocus: false,
+            retry: false,
+          },
+        },
+      },
       links: [
         loggerLink({
           enabled: (opts) =>
