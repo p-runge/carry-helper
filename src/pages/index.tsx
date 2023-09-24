@@ -33,7 +33,16 @@ export default function Home() {
                 {Object.entries(pokemon.stats).map(([stat, value]) => (
                   <li
                     key={stat}
-                    className={`grid grid-cols-2 gap-2 capitalize`}
+                    className={`grid grid-cols-2 gap-x-2 capitalize [&:nth-child(2)]:mb-3 [&:nth-child(2)]:border-b [&:nth-child(2)]:pb-3 ${
+                      {
+                        S: "text-green-500",
+                        A: "text-green-300",
+                        B: "text-yellow-400",
+                        C: "text-yellow-600",
+                        D: "text-red-300",
+                        F: "text-red-500",
+                      }[statValueToTier(value)]
+                    }`}
                     style={{ gridTemplateColumns: "1fr 3ch" }}
                   >
                     <div className="text-right">{stat}:</div>
@@ -76,8 +85,17 @@ const DebouncedInput: React.FC<
       value={value}
       onChange={(e) => setValue(e.target.value)}
       className={
-        "w-64 rounded border px-2 py-1 leading-tight focus:border-pink-500 focus:shadow-md focus:outline-none"
+        "w-64 rounded border px-2 py-1 text-3xl leading-tight focus:border-pink-500 focus:shadow-md focus:outline-none"
       }
     />
   );
+};
+
+const statValueToTier = (value: number) => {
+  if (value >= 150) return "S";
+  if (value >= 120) return "A";
+  if (value >= 100) return "B";
+  if (value >= 80) return "C";
+  if (value >= 60) return "D";
+  return "F";
 };

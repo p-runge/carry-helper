@@ -18,12 +18,12 @@ export const pokemonRouter = createTRPCRouter({
           pokemon && {
             name: pokemon.name,
             stats: {
-              hp: pokemon.stats[0]!.base_stat,
               attack: pokemon.stats[1]!.base_stat,
-              defense: pokemon.stats[2]!.base_stat,
               ["special-attack"]: pokemon.stats[3]!.base_stat,
-              ["special-defense"]: pokemon.stats[4]!.base_stat,
               speed: pokemon.stats[5]!.base_stat,
+              hp: pokemon.stats[0]!.base_stat,
+              defense: pokemon.stats[2]!.base_stat,
+              ["special-defense"]: pokemon.stats[4]!.base_stat,
             },
           }
         );
