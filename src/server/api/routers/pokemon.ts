@@ -6,6 +6,12 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 const api = new PokemonClient();
 
 export const pokemonRouter = createTRPCRouter({
+  fetchAllNames: publicProcedure.query(async () => {
+    const { results: pokemons } = await api.listPokemonSpecies(undefined, 2000);
+
+    return pokemons.map((pokemon) => pokemon.name);
+  }),
+
   fetchByName: publicProcedure
     .input(z.object({ name: z.string() }))
     .query(async ({ input }) => {

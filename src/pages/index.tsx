@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { distance } from "fastest-levenshtein";
 
 import { api } from "~/utils/api";
 
@@ -36,7 +37,7 @@ export default function Home() {
               />
             </div>
           </div>
-          <DebouncedInput
+          <Input
             placeholder="Enter Pokémon name"
             value={pokemonName}
             onChange={(v) => setPokemonName(v)}
@@ -45,54 +46,37 @@ export default function Home() {
             null ? (
             <p className="text-2xl text-white">That&apos;s not a Pokémon</p>
           ) : (
-            (() => {
-              const highestStat = Object.entries(pokemon.stats).reduce(
-                (acc, [stat, value]) => {
-                  if (value > acc.value) {
-                    return { stat, value };
-                  }
-
-                  return acc;
-                },
-                { stat: "", value: 0 },
-              ).value;
-
-              return (
-                <div className="rounded border border-white p-3 text-white">
-                  <p className="text-center text-2xl capitalize">
-                    {pokemon.name}
-                  </p>
-                  <hr className="py-2" />
-                  <ul className="flex flex-col gap-2">
-                    {Object.entries(pokemon.stats).map(([stat, value]) => (
-                      <>
-                        <li
-                          key={stat}
-                          className="grid grid-cols-[1fr,3ch,1fr] gap-2 capitalize"
-                        >
-                          <div className="text-right">{stat}:</div>
-                          <div className="w-[3ch] text-right">{value}</div>
-                          <div
-                            className={`h-6 ${
-                              {
-                                S: "bg-green-500",
-                                A: "bg-green-300",
-                                B: "bg-yellow-400",
-                                C: "bg-yellow-600",
-                                D: "bg-red-300",
-                                F: "bg-red-500",
-                              }[statValueToTier(value)]
-                            }`}
-                            style={{ width: `${(value / 255) * 100}%` }}
-                          />
-                        </li>
-                        {stat === "special-attack" && <hr />}
-                      </>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })()
+            <div className="rounded border border-white p-3 text-white">
+              <p className="text-center text-2xl capitalize">{pokemon.name}</p>
+              <hr className="py-2" />
+              <ul className="flex flex-col gap-2">
+                {Object.entries(pokemon.stats).map(([stat, value]) => (
+                  <>
+                    <li
+                      key={stat}
+                      className="grid grid-cols-[1fr,3ch,1fr] gap-2 capitalize"
+                    >
+                      <div className="text-right">{stat}:</div>
+                      <div className="w-[3ch] text-right">{value}</div>
+                      <div
+                        className={`h-6 ${
+                          {
+                            S: "bg-green-500",
+                            A: "bg-green-300",
+                            B: "bg-yellow-400",
+                            C: "bg-yellow-600",
+                            D: "bg-red-300",
+                            F: "bg-red-500",
+                          }[statValueToTier(value)]
+                        }`}
+                        style={{ width: `${(value / 255) * 100}%` }}
+                      />
+                    </li>
+                    {stat === "special-attack" && <hr />}
+                  </>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       </main>
@@ -100,26 +84,51 @@ export default function Home() {
   );
 }
 
-const DebouncedInput: React.FC<
+const Input: React.FC<
   {
     value: string;
     onChange: (value: string) => void;
-    debounce?: number;
   } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">
-> = ({ value: initialValue, onChange, debounce = 300, ...props }) => {
-  const [value, setValue] = useState(initialValue);
+> = ({ value, onChange, ...props }) => {
+  const { data: allPokemon } = api.pokemon.fetchAllNames.useQuery();
 
+  const [filteredPokemon, setFilteredPokemon] = useState(allPokemon ?? []);
   useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+    setFilteredPokemon(allPokemon ?? []);
+  }, [allPokemon]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-    return () => clearTimeout(timeout);
-  }, [debounce, onChange, value]);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const userInput = e.target.value;
+    onChange(userInput);
+    setShowDropdown(true);
+
+    // Sort and filter Pokemon by their Levenshtein distance to userInput
+    const sortedAndFilteredPokemon =
+      allPokemon
+        ?.map((pokemon) => ({
+          pokemon,
+          dist: distance(userInput, pokemon),
+        }))
+        .filter(({ dist, pokemon }) => {
+          const avgLength = (userInput.length + pokemon.length) / 2;
+          return dist < avgLength * 0.9; // Threshold is 90% of average length
+        })
+        .sort((a, b) => a.dist - b.dist)
+        .map(({ pokemon }) => pokemon) ?? [];
+
+    setFilteredPokemon(sortedAndFilteredPokemon);
+  };
+
+  const handleDropdownClick = (pokemon: string) => {
+    onChange(pokemon);
+    setShowDropdown(false);
+  };
+
+  const handleDropdownHide = () => {
+    setShowDropdown(false);
+  };
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
@@ -131,18 +140,30 @@ const DebouncedInput: React.FC<
   }, []);
 
   return (
-    <input
-      {...props}
-      ref={inputRef}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      className={
-        "w-80 rounded border px-2 py-1 text-center text-3xl leading-tight focus:outline-none"
-      }
-    />
+    <div className="relative">
+      <input
+        {...props}
+        ref={inputRef}
+        value={value}
+        onChange={handleInputChange}
+        className={
+          "w-80 rounded border px-2 py-1 text-center text-3xl leading-tight focus:outline-none"
+        }
+      />
+      {showDropdown && (
+        <Dropdown
+          options={filteredPokemon}
+          onSelect={handleDropdownClick}
+          onHide={handleDropdownHide}
+        />
+      )}
+    </div>
   );
 };
 
+/**
+ * Converts a stat value to a tier
+ */
 const statValueToTier = (value: number) => {
   if (value >= 150) return "S";
   if (value >= 120) return "A";
@@ -150,4 +171,69 @@ const statValueToTier = (value: number) => {
   if (value >= 80) return "C";
   if (value >= 60) return "D";
   return "F";
+};
+
+/**
+ * Keyboard controllable dropdown
+ */
+const Dropdown: React.FC<{
+  options: string[];
+  onSelect: (option: string) => void;
+  onHide: () => void;
+}> = ({ options: allOptions, onSelect, onHide }) => {
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const dropdownRef = useRef<HTMLUListElement>(null);
+
+  const options = allOptions.slice(0, 5);
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      setHighlightedIndex((prevIndex) =>
+        Math.min(prevIndex + 1, options.length - 1),
+      );
+    } else if (e.key === "ArrowUp") {
+      setHighlightedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+    } else if (e.key === "Enter" && highlightedIndex !== -1) {
+      onSelect(options[highlightedIndex] ?? "");
+    }
+  };
+
+  const handleClickOutside = (event: Event) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      onHide();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("click", handleClickOutside);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightedIndex, options]);
+
+  return (
+    <ul
+      ref={dropdownRef}
+      className="absolute top-0 z-10 mt-12 w-80 rounded border border-gray-300 bg-white"
+    >
+      {options.map((option, index) => (
+        <li
+          key={index}
+          onClick={() => onSelect(option)}
+          className={`cursor-pointer p-2 ${
+            index === highlightedIndex ? "bg-slate-300" : "hover:bg-slate-200"
+          }`}
+        >
+          {option}
+        </li>
+      ))}
+    </ul>
+  );
 };
