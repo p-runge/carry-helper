@@ -72,7 +72,7 @@ export default function Home() {
                             F: "bg-red-500",
                           }[statValueToTier(value)]
                         }`}
-                        style={{ width: `${(value / 255) * 100}%` }}
+                        style={{ width: `${(100 / 255) * value}%` }}
                       />
                     </li>
                     {stat === "special-attack" && <hr />}
