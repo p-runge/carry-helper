@@ -49,9 +49,9 @@ export default function Home() {
             null ? (
             <p className="text-2xl text-white">That&apos;s not a Pokémon</p>
           ) : (
-            <div className="rounded border border-white p-3 text-white">
+            <div className="flex flex-col gap-2 rounded border border-white p-3 text-white">
               <p className="text-center text-2xl capitalize">{pokemon.name}</p>
-              <hr className="py-2" />
+              <hr />
               <ul className="flex flex-col gap-2">
                 {Object.entries(pokemon.stats).map(([stat, value]) => (
                   <>
