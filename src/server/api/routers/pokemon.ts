@@ -31,6 +31,30 @@ export const pokemonRouter = createTRPCRouter({
               defense: pokemon.stats[2]!.base_stat,
               ["special-defense"]: pokemon.stats[4]!.base_stat,
             },
+            moveLevels: pokemon.moves
+              .map((move) => {
+                return (
+                  move.version_group_details
+                    // filter out versions that are not crystal
+                    .filter((versionGroupDetail) => {
+                      return (
+                        versionGroupDetail.version_group.name === "crystal"
+                      );
+                    })
+                    // filter for moves that are learned by level up
+                    .filter((versionGroupDetail) => {
+                      return versionGroupDetail.level_learned_at;
+                    })
+                    // map to level learned
+                    .map((versionGroupDetail) => {
+                      return versionGroupDetail.level_learned_at;
+                    })
+                );
+              })
+              // flatten array
+              .reduce((a, b) => [...a, ...b], [])
+              // sort ascending
+              .sort((a, b) => a - b),
           }
         );
       } catch (e) {
