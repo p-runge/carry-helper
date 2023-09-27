@@ -13,7 +13,7 @@ export const pokemonRouter = createTRPCRouter({
   }),
 
   fetchByName: publicProcedure
-    .input(z.object({ name: z.string() }))
+    .input(z.object({ name: z.string(), versionGroup: z.string() }))
     .query(async ({ input }) => {
       if (!input.name) return null;
 
@@ -38,7 +38,8 @@ export const pokemonRouter = createTRPCRouter({
                     // filter out versions that are not crystal
                     .filter((versionGroupDetail) => {
                       return (
-                        versionGroupDetail.version_group.name === "crystal"
+                        versionGroupDetail.version_group.name ===
+                        input.versionGroup
                       );
                     })
                     // filter for moves that are learned by level up

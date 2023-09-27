@@ -9,6 +9,7 @@ export default function Home() {
   const [pokemonName, setPokemonName] = useState("");
   const { data: pokemon } = api.pokemon.fetchByName.useQuery({
     name: pokemonName,
+    versionGroup: "crystal",
   });
 
   return (
@@ -21,15 +22,13 @@ export default function Home() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center bg-slate-900">
+      <main className="flex min-h-screen flex-col items-center bg-slate-900 text-white">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-8">
           <div className="flex flex-col gap-3 text-center">
-            <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
+            <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
               Carry Helper
             </h1>
-            <h2 className="text-white">
-              Check how good your Pokémon is as a carry
-            </h2>
+            <h2 className="">Check how good your Pokémon is as a carry</h2>
             <div className="relative h-40">
               <Image
                 src="/logo.png"
@@ -47,9 +46,9 @@ export default function Home() {
           />
           {pokemon === undefined || pokemonName === "" ? null : pokemon ===
             null ? (
-            <p className="text-2xl text-white">That&apos;s not a Pokémon</p>
+            <p className="text-2xl ">That&apos;s not a Pokémon</p>
           ) : (
-            <div className="flex flex-col gap-2 rounded border border-white p-3 text-white">
+            <div className="flex flex-col gap-2 rounded border border-white p-3 ">
               <p className="text-center text-2xl capitalize">{pokemon.name}</p>
               <hr />
               <ul className="flex flex-col gap-2">
@@ -95,7 +94,12 @@ const Input: React.FC<
     value: string;
     onChange: (value: string) => void;
   } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">
-> = ({ value, onChange, ...props }) => {
+> = ({ value: initialValue, onChange, ...props }) => {
+  const [value, setValue] = useState(initialValue);
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   const { data: allPokemon } = api.pokemon.fetchAllNames.useQuery();
 
   const [filteredPokemon, setFilteredPokemon] = useState(allPokemon ?? []);
@@ -107,7 +111,7 @@ const Input: React.FC<
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const userInput = e.target.value;
-    onChange(userInput);
+    setValue(userInput);
     setShowDropdown(true);
 
     // Sort and filter Pokemon by their Levenshtein distance to userInput
@@ -128,6 +132,7 @@ const Input: React.FC<
   };
 
   const handleDropdownClick = (pokemon: string) => {
+    setValue(pokemon);
     onChange(pokemon);
     setShowDropdown(false);
   };
@@ -146,7 +151,7 @@ const Input: React.FC<
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative text-slate-900">
       <input
         {...props}
         ref={inputRef}
