@@ -12,7 +12,7 @@ const description =
 
 export default function Home() {
   const [pokemonName, setPokemonName] = useState("");
-  const { data: pokemon } = api.pokemon.fetchByName.useQuery({
+  const { data: pokemon, status } = api.pokemon.fetchByName.useQuery({
     name: pokemonName,
     versionGroup: "crystal",
   });
@@ -46,10 +46,9 @@ export default function Home() {
             value={pokemonName}
             onChange={(v) => setPokemonName(v)}
           />
-          {pokemon === undefined || pokemonName === "" ? null : pokemon ===
-            null ? (
-            <p className="text-2xl ">That&apos;s not a Pokémon</p>
-          ) : (
+          {pokemonName && status === "loading" ? (
+            <p>Loading...</p>
+          ) : !pokemon || !pokemonName ? null : (
             <div className="flex flex-col gap-2 rounded border border-white p-3 ">
               <p className="text-center text-2xl capitalize">{pokemon.name}</p>
               <hr />
