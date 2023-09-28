@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { distance } from "fastest-levenshtein";
 
 import { api } from "~/utils/api";
@@ -53,11 +53,8 @@ export default function Home() {
               <hr />
               <ul className="flex flex-col gap-2">
                 {Object.entries(pokemon.stats).map(([stat, value]) => (
-                  <>
-                    <li
-                      key={stat}
-                      className="grid grid-cols-[1fr,3ch,1fr] gap-2 capitalize"
-                    >
+                  <React.Fragment key={stat}>
+                    <li className="grid grid-cols-[1fr,3ch,1fr] gap-2 capitalize">
                       <div className="text-right">{stat}:</div>
                       <div className="w-[3ch] text-right">{value}</div>
                       <div
@@ -75,7 +72,7 @@ export default function Home() {
                       />
                     </li>
                     {stat === "special-attack" && <hr />}
-                  </>
+                  </React.Fragment>
                 ))}
               </ul>
               <hr />
