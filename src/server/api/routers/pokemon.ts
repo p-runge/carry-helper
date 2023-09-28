@@ -1,4 +1,5 @@
-import { PokemonClient } from "pokenode-ts";
+import { type Pokemon, PokemonClient } from "pokenode-ts";
+import { type Stat, gen2StatDiffs } from "public/assets/gen2StatDiffs";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -24,12 +25,18 @@ export const pokemonRouter = createTRPCRouter({
           pokemon && {
             name: pokemon.name,
             stats: {
-              attack: pokemon.stats[1]!.base_stat,
-              ["special-attack"]: pokemon.stats[3]!.base_stat,
-              speed: pokemon.stats[5]!.base_stat,
-              hp: pokemon.stats[0]!.base_stat,
-              defense: pokemon.stats[2]!.base_stat,
-              ["special-defense"]: pokemon.stats[4]!.base_stat,
+              attack: updateStatToGen2Value(pokemon, "attack"),
+              ["special-attack"]: updateStatToGen2Value(
+                pokemon,
+                "special-attack",
+              ),
+              speed: updateStatToGen2Value(pokemon, "speed"),
+              hp: updateStatToGen2Value(pokemon, "hp"),
+              defense: updateStatToGen2Value(pokemon, "defense"),
+              ["special-defense"]: updateStatToGen2Value(
+                pokemon,
+                "special-defense",
+              ),
             },
             moveLevels: pokemon.moves
               .map((move) => {
@@ -63,3 +70,11 @@ export const pokemonRouter = createTRPCRouter({
       }
     }),
 });
+
+const updateStatToGen2Value = (pokemon: Pokemon, stat: Stat): number => {
+  const originalValue = pokemon.stats.find(
+    (s) => s.stat.name === stat,
+  )!.base_stat;
+
+  return gen2StatDiffs[pokemon.id]?.[stat] ?? originalValue;
+};
