@@ -8,7 +8,7 @@ const api = new PokemonClient();
 
 export const pokemonRouter = createTRPCRouter({
   fetchAllNames: publicProcedure.query(async () => {
-    const { results: pokemons } = await api.listPokemonSpecies(undefined, 2000);
+    const { results: pokemons } = await api.listPokemonSpecies(undefined, 251);
 
     return pokemons.map((pokemon) => pokemon.name);
   }),

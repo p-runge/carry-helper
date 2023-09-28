@@ -5,6 +5,10 @@ import { distance } from "fastest-levenshtein";
 
 import { api } from "~/utils/api";
 
+const title = "Carry Helper";
+const description =
+  "Check how good your Pokémon is as a carry in Pokémon Crystal";
+
 export default function Home() {
   const [pokemonName, setPokemonName] = useState("");
   const { data: pokemon } = api.pokemon.fetchByName.useQuery({
@@ -15,20 +19,17 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Carry Helper</title>
-        <meta
-          name="description"
-          content="Check how good your Pokémon is as a carry"
-        />
+        <title>{title}</title>
+        <meta name="description" content={description} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center bg-slate-900 text-white">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-8">
           <div className="flex flex-col gap-3 text-center">
             <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-              Carry Helper
+              {title}
             </h1>
-            <h2 className="">Check how good your Pokémon is as a carry</h2>
+            <h2 className="">{description}</h2>
             <div className="relative h-40">
               <Image
                 src="/logo.png"
