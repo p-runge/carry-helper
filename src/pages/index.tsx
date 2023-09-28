@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { distance } from "fastest-levenshtein";
 
 import { api } from "~/utils/api";
+import { Footer } from "~/components/Footer";
 
 const title = "Carry Helper";
 const description =
@@ -83,6 +84,7 @@ export default function Home() {
           )}
         </div>
       </main>
+      <Footer />
     </>
   );
 }
