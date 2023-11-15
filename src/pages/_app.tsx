@@ -1,4 +1,5 @@
 import { type AppType } from "next/app";
+import "regenerator-runtime/runtime";
 
 import { api } from "~/utils/api";
 

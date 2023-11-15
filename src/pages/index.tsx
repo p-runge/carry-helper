@@ -5,6 +5,7 @@ import { distance } from "fastest-levenshtein";
 
 import { api } from "~/utils/api";
 import { Footer } from "~/components/Footer";
+import Dictaphone from "~/components/Dictaphone";
 
 const title = "Carry Helper";
 const description =
@@ -150,23 +151,39 @@ const Input: React.FC<
   }, []);
 
   return (
-    <div className="relative text-slate-900">
-      <input
-        {...props}
-        ref={inputRef}
-        value={value}
-        onChange={handleInputChange}
-        className={
-          "w-80 rounded border px-2 py-1 text-center text-3xl leading-tight focus:outline-none"
-        }
-      />
-      {showDropdown && (
-        <Dropdown
-          options={filteredPokemon}
-          onSelect={handleDropdownClick}
-          onHide={handleDropdownHide}
+    <div className="flex gap-3">
+      <div className="relative text-slate-900">
+        <input
+          {...props}
+          ref={inputRef}
+          value={value}
+          onChange={handleInputChange}
+          className={
+            "w-80 rounded border px-2 py-1 text-center text-3xl leading-tight focus:outline-none"
+          }
         />
-      )}
+        {showDropdown && (
+          <Dropdown
+            options={filteredPokemon}
+            onSelect={handleDropdownClick}
+            onHide={handleDropdownHide}
+          />
+        )}
+      </div>
+      <Dictaphone
+        onChange={(value) => {
+          const sortedPokemon =
+            allPokemon
+              ?.map((pokemon) => ({
+                pokemon,
+                dist: distance(value, pokemon),
+              }))
+              .sort((a, b) => a.dist - b.dist)
+              .map(({ pokemon }) => pokemon) ?? [];
+
+          onChange(sortedPokemon[0] ?? "");
+        }}
+      />
     </div>
   );
 };
