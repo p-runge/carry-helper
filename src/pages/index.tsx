@@ -7,7 +7,7 @@ import { api } from "~/utils/api";
 import { Footer } from "~/components/Footer";
 import Dictaphone from "~/components/Dictaphone";
 import PokemonTile from "~/components/PokemonTile";
-import { BsArrowRight } from "react-icons/bs";
+import type { Pokemon } from "~/types/Pokemon";
 
 const title = "Carry Helper";
 const description =
@@ -15,16 +15,21 @@ const description =
 
 export default function Home() {
   const [pokemonName, setPokemonName] = useState("");
-  const [previousPokemon, setPreviousPokemon] = useState<Pokemon>(null);
-  const [tmpPokemon, setTmpPokemon] = useState<Pokemon>(null);
+  const [previousPokemon, setPreviousPokemon] = useState<Pokemon>();
+  const [currentPokemon, setCurrentPokemon] = useState<Pokemon>();
   const { data: pokemon, status } = api.pokemon.fetchByName.useQuery({
     name: pokemonName,
     versionGroup: "crystal",
   });
 
   useEffect(() => {
-    setPreviousPokemon(tmpPokemon); // Save the previous Pokemon
-    !pokemon || pokemon == undefined ? null : setTmpPokemon(pokemon); // backup the current Pokemon
+    if (!pokemon) {
+      return;
+    }
+
+    setPreviousPokemon(currentPokemon); // Save the previous Pokemon
+    setCurrentPokemon(pokemon); // Save the current Pokemon
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pokemon]);
 
   return (
@@ -56,17 +61,17 @@ export default function Home() {
             value={pokemonName}
             onChange={(v) => setPokemonName(v)}
           />
-          <section className="container flex flex-row items-center justify-center gap-12">
+          <section className="flex flex-row items-center justify-center gap-12">
             {!previousPokemon ? null : (
               <>
                 <PokemonTile pokemon={previousPokemon} />
-                <BsArrowRight className="text-4xl" />
+                <span className="text-4xl">→</span>
               </>
             )}
             {pokemonName && status === "loading" ? (
               <p>Loading...</p>
-            ) : !pokemon || !pokemonName ? null : (
-              <PokemonTile pokemon={pokemon} />
+            ) : !currentPokemon || !pokemonName ? null : (
+              <PokemonTile pokemon={currentPokemon} />
             )}
           </section>
         </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import type { Pokemon } from "~/types/Pokemon";
 
 export default function PokemonTile({ pokemon }: { pokemon: Pokemon }) {
   return (
