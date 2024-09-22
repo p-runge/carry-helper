@@ -15,7 +15,7 @@ const description =
 
 export default function Home() {
   const [pokemonName, setPokemonName] = useState("");
-  const [previousPokemon, setPreviousPokemon] = useState<Pokemon>();
+  const [lockedPokemon, setLockedPokemon] = useState<Pokemon>();
   const [currentPokemon, setCurrentPokemon] = useState<Pokemon>();
   const { data: pokemon, status } = api.pokemon.fetchByName.useQuery({
     name: pokemonName,
@@ -26,9 +26,8 @@ export default function Home() {
     if (!pokemon) {
       return;
     }
-
-    setPreviousPokemon(currentPokemon); // Save the previous Pokemon
     setCurrentPokemon(pokemon); // Save the current Pokemon
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pokemon]);
 
@@ -61,10 +60,18 @@ export default function Home() {
             value={pokemonName}
             onChange={(v) => setPokemonName(v)}
           />
+          <div className="flex flex-row gap-32">
+            <span
+              onClick={() => setLockedPokemon(currentPokemon)}
+              className="text-2xl"
+            >
+              {currentPokemon && "⇋"}
+            </span>
+          </div>
           <section className="flex flex-row items-center justify-center gap-12">
-            {!previousPokemon ? null : (
+            {lockedPokemon && (
               <>
-                <PokemonTile pokemon={previousPokemon} />
+                <PokemonTile pokemon={lockedPokemon} />
                 <span className="text-4xl">→</span>
               </>
             )}
