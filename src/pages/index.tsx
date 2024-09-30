@@ -8,6 +8,7 @@ import { Footer } from "~/components/Footer";
 import Dictaphone from "~/components/Dictaphone";
 import PokemonTile from "~/components/PokemonTile";
 import type { Pokemon } from "~/types/Pokemon";
+import PokemonCompareTile from "~/components/PokemonCompareTile";
 
 const title = "Carry Helper";
 const description =
@@ -60,19 +61,34 @@ export default function Home() {
             value={pokemonName}
             onChange={(v) => setPokemonName(v)}
           />
-          <div className="flex flex-row gap-32">
-            <span
-              onClick={() => setLockedPokemon(currentPokemon)}
-              className="text-2xl"
-            >
-              {currentPokemon && "⇋"}
-            </span>
-          </div>
-          <section className="flex flex-row items-center justify-center gap-12">
+          <div className="grid grid-cols-[5fr_3em_5fr] gap-12">
             {lockedPokemon && (
+              <span
+                onClick={() => setLockedPokemon(undefined)}
+                className="cursor-pointer justify-self-end text-2xl"
+              >
+                ⇎
+              </span>
+            )}
+            {currentPokemon && (
+              <div className="col-span-2 col-start-2 grid grid-cols-[3em_1fr] place-items-center">
+                <span
+                  onClick={() => setLockedPokemon(currentPokemon)}
+                  className="cursor-pointer self-center justify-self-center text-2xl"
+                  title="Lock to compare"
+                >
+                  ⇋
+                </span>
+              </div>
+            )}
+
+            {lockedPokemon && currentPokemon && (
               <>
                 <PokemonTile pokemon={lockedPokemon} />
-                <span className="text-4xl">→</span>
+                <PokemonCompareTile
+                  pokemon={currentPokemon}
+                  compareTo={lockedPokemon}
+                />
               </>
             )}
             {pokemonName && status === "loading" ? (
@@ -80,7 +96,7 @@ export default function Home() {
             ) : !currentPokemon || !pokemonName ? null : (
               <PokemonTile pokemon={currentPokemon} />
             )}
-          </section>
+          </div>
         </div>
       </main>
       <Footer />
