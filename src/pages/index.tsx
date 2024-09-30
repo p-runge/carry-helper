@@ -61,7 +61,7 @@ export default function Home() {
             value={pokemonName}
             onChange={(v) => setPokemonName(v)}
           />
-          <div className="grid grid-cols-[5fr_3em_5fr] gap-12">
+          <div className="grid grid-cols-[5fr_4em_5fr] gap-12">
             {lockedPokemon && (
               <span
                 onClick={() => setLockedPokemon(undefined)}
@@ -71,7 +71,7 @@ export default function Home() {
               </span>
             )}
             {currentPokemon && (
-              <div className="col-span-2 col-start-2 grid grid-cols-[3em_1fr] place-items-center">
+              <div className="col-span-2 col-start-2 grid grid-cols-[4em_1fr] place-items-center">
                 <span
                   onClick={() => setLockedPokemon(currentPokemon)}
                   className="cursor-pointer self-center justify-self-center text-2xl"

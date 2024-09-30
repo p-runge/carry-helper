@@ -32,11 +32,7 @@ export default function PokemonstatCompareTile({
                       compareTo.stats[stat as keyof typeof compareTo.stats],
                     );
                     return (
-                      <div
-                        className={`w-[3ch] text-center ${coloreOfStat(
-                          statDiff,
-                        )}`}
-                      >
+                      <div className={`text-center ${coloreOfStat(statDiff)}`}>
                         {statDiff > 0 ? `+${statDiff}` : `${statDiff}`}
                       </div>
                     );
