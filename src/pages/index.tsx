@@ -94,7 +94,13 @@ export default function Home() {
             {pokemonName && status === "loading" ? (
               <p>Loading...</p>
             ) : !currentPokemon || !pokemonName ? null : (
-              <PokemonTile pokemon={currentPokemon} />
+              <div
+                className={` ${
+                  !lockedPokemon ? "col-span-full justify-self-center" : ""
+                }`}
+              >
+                <PokemonTile pokemon={currentPokemon} />
+              </div>
             )}
           </div>
         </div>
