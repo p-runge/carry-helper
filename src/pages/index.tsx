@@ -6,6 +6,9 @@ import { distance } from "fastest-levenshtein";
 import { api } from "~/utils/api";
 import { Footer } from "~/components/Footer";
 import Dictaphone from "~/components/Dictaphone";
+import PokemonTile from "~/components/PokemonTile";
+import type { Pokemon } from "~/types/Pokemon";
+import PokemonCompareTile from "~/components/PokemonCompareTile";
 
 const title = "Carry Helper";
 const description =
@@ -13,10 +16,21 @@ const description =
 
 export default function Home() {
   const [pokemonName, setPokemonName] = useState("");
+  const [lockedPokemon, setLockedPokemon] = useState<Pokemon>();
+  const [currentPokemon, setCurrentPokemon] = useState<Pokemon>();
   const { data: pokemon, status } = api.pokemon.fetchByName.useQuery({
     name: pokemonName,
     versionGroup: "crystal",
   });
+
+  useEffect(() => {
+    if (!pokemon) {
+      return;
+    }
+    setCurrentPokemon(pokemon); // Save the current Pokemon
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pokemon]);
 
   return (
     <>
@@ -47,41 +61,48 @@ export default function Home() {
             value={pokemonName}
             onChange={(v) => setPokemonName(v)}
           />
-          {pokemonName && status === "loading" ? (
-            <p>Loading...</p>
-          ) : !pokemon || !pokemonName ? null : (
-            <div className="flex flex-col gap-2 rounded border border-white p-3 ">
-              <p className="text-center text-2xl capitalize">{pokemon.name}</p>
-              <hr />
-              <ul className="flex flex-col gap-2">
-                {Object.entries(pokemon.stats).map(([stat, value]) => (
-                  <React.Fragment key={stat}>
-                    <li className="grid grid-cols-[1fr,3ch,1fr] gap-2 capitalize">
-                      <div className="text-right">{stat}:</div>
-                      <div className="w-[3ch] text-right">{value}</div>
-                      <div
-                        className={`h-6 ${
-                          {
-                            S: "bg-green-500",
-                            A: "bg-green-300",
-                            B: "bg-yellow-400",
-                            C: "bg-yellow-600",
-                            D: "bg-red-300",
-                            F: "bg-red-500",
-                          }[statValueToTier(value)]
-                        }`}
-                        style={{ width: `${(100 / 255) * value}%` }}
-                      />
-                    </li>
-                    {stat === "special-attack" && <hr />}
-                  </React.Fragment>
-                ))}
-              </ul>
-              <hr />
-              <p className="text-lg">Moves learned on level:</p>
-              <p>{pokemon.moveLevels.join(", ")}</p>
-            </div>
-          )}
+          <div className="grid grid-cols-[5fr_4em_5fr] gap-12">
+            {lockedPokemon && (
+              <span
+                onClick={() => setLockedPokemon(undefined)}
+                className="cursor-pointer justify-self-end text-2xl"
+              >
+                ⇎
+              </span>
+            )}
+            {currentPokemon && (
+              <div className="col-span-2 col-start-2 grid grid-cols-[4em_1fr] place-items-center">
+                <span
+                  onClick={() => setLockedPokemon(currentPokemon)}
+                  className="cursor-pointer self-center justify-self-center text-2xl"
+                  title="Lock to compare"
+                >
+                  ⇋
+                </span>
+              </div>
+            )}
+
+            {lockedPokemon && currentPokemon && (
+              <>
+                <PokemonTile pokemon={lockedPokemon} />
+                <PokemonCompareTile
+                  pokemon={currentPokemon}
+                  compareTo={lockedPokemon}
+                />
+              </>
+            )}
+            {pokemonName && status === "loading" ? (
+              <p>Loading...</p>
+            ) : !currentPokemon || !pokemonName ? null : (
+              <div
+                className={` ${
+                  !lockedPokemon ? "col-span-full justify-self-center" : ""
+                }`}
+              >
+                <PokemonTile pokemon={currentPokemon} />
+              </div>
+            )}
+          </div>
         </div>
       </main>
       <Footer />
@@ -186,18 +207,6 @@ const Input: React.FC<
       />
     </div>
   );
-};
-
-/**
- * Converts a stat value to a tier
- */
-const statValueToTier = (value: number) => {
-  if (value >= 150) return "S";
-  if (value >= 120) return "A";
-  if (value >= 100) return "B";
-  if (value >= 80) return "C";
-  if (value >= 60) return "D";
-  return "F";
 };
 
 /**
